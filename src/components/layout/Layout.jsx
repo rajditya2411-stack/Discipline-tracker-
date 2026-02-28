@@ -9,6 +9,7 @@ const pageTitles = {
   '/time-blocks': 'Time Blocks',
   '/analytics': 'Analytics & Insights',
   '/weekly-review': 'Weekly Review',
+  '/skills': 'Skills',
   '/goals': 'Goals & Templates',
   '/milestones': 'Achievements',
   '/penalties': 'Penalty Tracker',

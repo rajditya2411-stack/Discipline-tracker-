@@ -1,0 +1,138 @@
+I want to change the goals and templates page and convert it into a new page:
+
+"Skills"
+
+This must feel like a premium productivity SaaS feature, not a basic CRUD page.
+
+-------------------------------------
+PAGE REQUIREMENTS
+-------------------------------------
+
+Create a full Skill Dashboard system with the following architecture:
+
+Each Skill should have:
+
+- id
+- name
+- category (Coding, Fitness, Business, Content, Learning, etc.)
+- totalHoursInvested
+- streak
+- projectsCompleted
+- difficultyLevel (Beginner / Intermediate / Advanced)
+- marketReady (boolean toggle)
+- targetHours (default 300)
+- createdAt
+
+-------------------------------------
+UI STRUCTURE
+-------------------------------------
+
+1) Top Section: Skill Overview Stats (4 cards like Dashboard style)
+
+- Total Active Skills
+- Total Hours Across All Skills
+- Highest Streak Skill
+- Monetizable Skills Count (marketReady = true)
+
+Match existing dashboard card style.
+
+-------------------------------------
+
+2) Main Section: Skill Cards Grid
+
+Each skill should display:
+
+- Skill Name
+- Progress Bar (hours / targetHours)
+- Current Level Badge:
+    - 0–100h → Beginner
+    - 100–300h → Intermediate
+    - 300+ → Monetizable
+- Streak 🔥
+- Projects Completed
+- Market Ready Toggle
+- Small “View Details” button
+
+Design must look premium and aligned with existing aesthetic.
+
+-------------------------------------
+
+3) Skill Detail Modal or Page
+
+When clicking a skill:
+
+Show:
+
+- Line chart of hours over time (reuse Recharts)
+- Total logged time blocks linked to this skill
+- Streak history
+- Project log list
+- Add Project button
+- Add Manual Hours button
+
+-------------------------------------
+
+4) Add Skill Modal
+
+Form fields:
+- Name
+- Category
+- Target Hours
+- Initial Hours (optional)
+
+-------------------------------------
+
+5) Integration Requirements
+
+- Add "Skills" to sidebar navigation.
+- Add a small "Top Skill" widget on main Dashboard page.
+  Show:
+    - Skill with highest hours this week
+    - Mini progress bar
+
+-------------------------------------
+
+6) Data Logic
+
+For now:
+- Use local state or mock JSON if backend not connected yet.
+- But structure code cleanly so it can easily connect to API later.
+
+Use:
+- Reusable components
+- Clean folder structure:
+    /pages/Skills
+    /components/SkillCard
+    /components/SkillStats
+    /components/SkillDetail
+
+-------------------------------------
+
+7) Visual Requirements
+
+- Clean spacing
+- No clutter
+- Subtle animations on hover
+- Consistent font sizes
+- Progress bars must look elegant
+- Avoid bright colors; stay neutral + accent color
+
+-------------------------------------
+
+8) Bonus Feature (Important)
+
+Add a computed "Skill Score":
+
+Skill Score =
+(totalHoursInvested × 1.5)
++ (projectsCompleted × 10)
++ (streak × 2)
+
+Display this in Skill Detail view.
+
+-------------------------------------
+
+Write production-ready code.
+Keep it modular.
+Do not overcomplicate.
+Make it feel like a serious product , convert the goals and templates page into this skills page , make the ui and whole page as it is in the images also convert the goals and templates widget from the dashboard into the skills widget 

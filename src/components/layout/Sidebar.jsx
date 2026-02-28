@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, CheckSquare, Clock, BarChart3, Calendar, Target, Trophy, DollarSign, Settings } from 'lucide-react';
+import { Home, CheckSquare, Clock, BarChart3, Calendar, GraduationCap, Trophy, DollarSign, Settings } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { icon: Clock, label: 'Time Blocks', path: '/time-blocks' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
   { icon: Calendar, label: 'Weekly Review', path: '/weekly-review' },
+  { icon: GraduationCap, label: 'Skills', path: '/skills' },
   { icon: Target, label: 'Goals & Templates', path: '/goals' },
   { icon: Trophy, label: 'Milestones', path: '/milestones' },
   { icon: DollarSign, label: 'Penalties', path: '/penalties' },

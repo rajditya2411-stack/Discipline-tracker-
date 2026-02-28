@@ -37,7 +37,7 @@ export default function TimeDistributionChart() {
                 dataKey="value"
               >
                 {data.map((entry, index) => (
-                  <Cell key={index} fill={index === 0 ? '#F59E0B' : '#111827'} />
+                  <Cell key={index} fill={index === 0 ? '#111827' : '#374151'} />
                 ))}
                 {!data.length && <Cell fill="#E5E7EB" />}
               </Pie>
@@ -45,7 +45,7 @@ export default function TimeDistributionChart() {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-text-primary text-2xl font-bold">{Math.round(totalHours)}h</span>
+            <span className="text-[#111827] text-2xl font-bold">{Math.round(totalHours)}h</span>
           </div>
         </div>
         <div className="flex-1 space-y-3 w-full">
@@ -54,9 +54,9 @@ export default function TimeDistributionChart() {
               <div className="flex items-center gap-3">
                 <span
                   className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: idx === 0 ? '#F59E0B' : '#111827' }}
+                  style={{ backgroundColor: idx === 0 ? '#111827' : '#374151' }}
                 />
-                <span className="text-text-primary font-medium">{item.name}</span>
+                <span className="text-[#111827] font-medium">{item.name}</span>
               </div>
               <span className="text-text-secondary font-bold">{item.hours}h ({item.value}%)</span>
             </div>

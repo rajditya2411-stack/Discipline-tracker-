@@ -5,9 +5,9 @@ import HabitChecklist from '../dashboard/HabitChecklist';
 import WeeklyProgressChart from '../dashboard/WeeklyProgressChart';
 import TimeDistributionChart from '../dashboard/TimeDistributionChart';
 import YearHeatmap from '../dashboard/YearHeatmap';
-import ActiveGoals from '../dashboard/ActiveGoals';
+import ActiveSkills from '../dashboard/ActiveSkills';
 import MoneyAtStake from '../dashboard/MoneyAtStake';
-import Milestones from '../dashboard/Milestones';
+import GoalsWidget from '../dashboard/GoalsWidget';
 import { useHabits } from '../../context/HabitsContext';
 import { useTimeBlocks } from '../../context/TimeBlocksContext';
 
@@ -89,9 +89,9 @@ export default function Dashboard() {
 
       {/* Row 5 - Bottom widgets */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <ActiveGoals />
+        <ActiveSkills />
         <MoneyAtStake />
-        <Milestones />
+        <GoalsWidget />
       </div>
     </div>
   );
