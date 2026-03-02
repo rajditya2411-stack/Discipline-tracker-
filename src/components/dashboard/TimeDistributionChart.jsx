@@ -7,7 +7,8 @@ export default function TimeDistributionChart() {
 
   const data = useMemo(() => {
     const categories = {};
-    blocks.forEach(b => {
+    const today = new Date().toISOString().split('T')[0];
+    blocks.filter(b => b.date === today).forEach(b => {
       categories[b.category] = (categories[b.category] || 0) + (b.end - b.start);
     });
     const total = Object.values(categories).reduce((a, b) => a + b, 0);
@@ -28,7 +29,7 @@ export default function TimeDistributionChart() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data.length ? data : [{name: 'None', value: 1}]}
+                data={data.length ? data : [{name: 'No data', value: 1, hours: 0}]}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}

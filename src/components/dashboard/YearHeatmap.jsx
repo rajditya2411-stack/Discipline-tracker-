@@ -31,9 +31,9 @@ export default function YearHeatmap() {
         let level = 0;
         if (habits.length > 0) {
           const ratio = completedCount / habits.length;
-          if (ratio > 0.8) level = 4;
-          else if (ratio > 0.5) level = 3;
-          else if (ratio > 0.2) level = 2;
+          if (ratio >= 1) level = 4;
+          else if (ratio > 0.6) level = 3;
+          else if (ratio > 0.3) level = 2;
           else if (ratio > 0) level = 1;
         }
         weekData.push({ level, count: completedCount, date: dateStr });

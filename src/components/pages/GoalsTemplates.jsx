@@ -1,13 +1,101 @@
 import { useState, useMemo } from 'react';
-import { Plus, Target, X, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Target, X, Calendar, ChevronLeft, ChevronRight, Trash2, Edit3 } from 'lucide-react';
 import { useGoals } from '../../context/GoalsContext';
 import { useHabits } from '../../context/HabitsContext';
 
+function GoalDetailsModal({ goal, onClose }) {
+  const { updateGoal } = useGoals();
+  const [logVal, setLogVal] = useState('');
+  
+  const progress = Math.min(100, (Number(goal.current) / Number(goal.target)) * 100);
+  
+  const handleLogProgress = (e) => {
+    e.preventDefault();
+    if (!logVal) return;
+    updateGoal(goal.id, { current: Number(goal.current) + Number(logVal) });
+    setLogVal('');
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="bg-white w-full max-w-2xl rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="p-8 space-y-8 overflow-y-auto">
+           <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold text-[#111827]">{goal.name}</h2>
+                <p className="text-sm text-text-secondary font-medium uppercase tracking-wider">{goal.category}</p>
+              </div>
+              <span className="px-4 py-1 bg-black text-white rounded-full text-[10px] font-bold uppercase tracking-wider">
+                {goal.status || 'Active'}
+              </span>
+           </div>
+
+           <div className="grid grid-cols-3 gap-4">
+              <div className="bg-gray-50 rounded-2xl p-6 text-center">
+                 <span className="block text-2xl font-bold text-[#111827]">{goal.current}</span>
+                 <span className="text-[10px] font-bold text-text-secondary uppercase">Current</span>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-6 text-center">
+                 <span className="block text-2xl font-bold text-[#111827]">{goal.target}</span>
+                 <span className="text-[10px] font-bold text-text-secondary uppercase">Target</span>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-6 text-center">
+                 <span className="block text-2xl font-bold text-[#111827]">{goal.unit}</span>
+                 <span className="text-[10px] font-bold text-text-secondary uppercase">Unit</span>
+              </div>
+           </div>
+
+           <div className="space-y-4">
+              <div className="flex justify-between items-end">
+                 <h4 className="text-sm font-bold text-[#111827]">Progress to Goal</h4>
+                 <span className="text-xs font-bold text-text-secondary">{Math.round(progress)}%</span>
+              </div>
+              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                 <div className="h-full bg-black rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+              </div>
+           </div>
+
+           <div className="space-y-3">
+              <h4 className="text-sm font-bold text-[#111827]">Update Progress</h4>
+              <form onSubmit={handleLogProgress} className="flex gap-2">
+                 <input 
+                   type="number" 
+                   placeholder={`Add to ${goal.unit}...`} 
+                   value={logVal} 
+                   onChange={e => setLogVal(e.target.value)}
+                   className="flex-1 px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 text-sm font-medium" 
+                 />
+                 <button type="submit" className="px-6 bg-black text-white rounded-xl font-bold hover:opacity-90">
+                    Add
+                 </button>
+              </form>
+           </div>
+
+           {goal.description && (
+             <div className="space-y-2">
+                <h4 className="text-sm font-bold text-[#111827]">Description</h4>
+                <p className="text-sm text-text-secondary leading-relaxed bg-gray-50 p-4 rounded-xl">{goal.description}</p>
+             </div>
+           )}
+        </div>
+        <div className="p-4 bg-gray-50 border-t border-border flex justify-end gap-3">
+           <button onClick={onClose} className="px-6 py-2 border border-border bg-white text-text-secondary rounded-xl font-bold">Close Card</button>
+           <button onClick={onClose} className="px-6 py-2 bg-black text-white rounded-xl font-bold">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function GoalsTemplates() {
-  const { goals, addGoal } = useGoals();
+  const { goals, addGoal, deleteGoal, updateGoal } = useGoals();
   const { habits } = useHabits();
   const [activeTab, setActiveTab] = useState('Active');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProgressId, setEditingProgressId] = useState(null);
+  const [tempProgress, setTempProgress] = useState('');
+
+  const [selectedGoal, setSelectedGoal] = useState(null);
 
   const [newGoal, setNewGoal] = useState({
     name: '',
@@ -38,6 +126,11 @@ export default function GoalsTemplates() {
       current: 0, habitId: 'None', startDate: new Date().toISOString().split('T')[0],
       endDate: '', description: '', isTemplate: false
     });
+  };
+
+  const handleUpdateProgress = (id, current) => {
+    updateGoal(id, { current: Number(current) });
+    setEditingProgressId(null);
   };
 
   return (
@@ -98,11 +191,90 @@ export default function GoalsTemplates() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-            {/* Goal cards implementation */}
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full p-6">
+              {filteredGoals.map(goal => {
+                const progress = Math.min(100, (Number(goal.current) / Number(goal.target)) * 100);
+                const isEditing = editingProgressId === goal.id;
+                
+                return (
+                  <div key={goal.id} className="bg-white rounded-xl p-6 border border-border shadow-sm flex flex-col gap-4 text-left group">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-bold text-[#111827]">{goal.name}</h3>
+                        <p className="text-xs text-text-secondary font-medium uppercase tracking-wider">{goal.category}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="px-3 py-1 bg-gray-100 text-[#111827] rounded-full text-[10px] font-bold uppercase tracking-wider">
+                          {goal.type}
+                        </span>
+                        <button 
+                          onClick={() => deleteGoal(goal.id)}
+                          className="p-1 text-text-secondary hover:text-danger opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[10px] font-bold text-text-secondary uppercase tracking-wider items-center">
+                        {isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <input 
+                              type="number"
+                              value={tempProgress}
+                              onChange={(e) => setTempProgress(e.target.value)}
+                              autoFocus
+                              className="w-16 px-1 py-0.5 border border-border rounded text-xs text-[#111827]"
+                            />
+                            <button 
+                              onClick={() => handleUpdateProgress(goal.id, tempProgress)}
+                              className="text-[10px] text-primary font-bold"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 cursor-pointer hover:text-[#111827]" onClick={() => {
+                            setEditingProgressId(goal.id);
+                            setTempProgress(goal.current);
+                          }}>
+                            <span>{goal.current} / {goal.target} {goal.unit}</span>
+                            <Edit3 className="w-3 h-3" />
+                          </div>
+                        )}
+                        <span>{Math.round(progress)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#111827] rounded-full transition-all" style={{ width: `${progress}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 mt-auto">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-text-secondary uppercase">Deadline</span>
+                        <span className="text-xs font-bold text-[#111827]">{goal.endDate || 'No deadline'}</span>
+                      </div>
+                      <button 
+                        onClick={() => setSelectedGoal(goal)}
+                        className="text-xs font-bold text-[#111827] hover:underline"
+                      >
+                        Edit Details
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
         )}
       </div>
+
+      {selectedGoal && (
+        <GoalDetailsModal 
+          goal={selectedGoal} 
+          onClose={() => setSelectedGoal(null)} 
+        />
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">

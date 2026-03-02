@@ -17,6 +17,8 @@ export default function WeeklyReview() {
     sunday.setDate(monday.getDate() + 6);
 
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const todayStr = new Date().toISOString().slice(0, 10);
+    
     const dailyStats = days.map((label, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
@@ -26,8 +28,16 @@ export default function WeeklyReview() {
       return { name: label, completed, date: dateStr };
     });
 
-    let totalPossible = habits.length * 7;
-    let totalCompleted = dailyStats.reduce((sum, d) => sum + d.completed, 0);
+    // Only count habits for days that have passed or are today
+    let totalPossible = 0;
+    let totalCompleted = 0;
+    
+    dailyStats.forEach(d => {
+      if (d.date <= todayStr) {
+        totalPossible += habits.length;
+        totalCompleted += d.completed;
+      }
+    });
     let timeLogged = 0;
     let blocksDone = 0;
     let totalBlocks = 0;

@@ -11,8 +11,7 @@ const pageTitles = {
   '/weekly-review': 'Weekly Review',
   '/skills': 'Skills',
   '/goals': 'Goals & Templates',
-  '/milestones': 'Achievements',
-  '/penalties': 'Penalty Tracker',
+  '/missed-logs': 'Missed Logs & Penalties',
   '/settings': 'Settings',
 };
 

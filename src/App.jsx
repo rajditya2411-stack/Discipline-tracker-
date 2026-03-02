@@ -11,9 +11,8 @@ import Analytics from './components/pages/Analytics';
 import WeeklyReview from './components/pages/WeeklyReview';
 import Skills from './components/pages/Skills';
 import GoalsTemplates from './components/pages/GoalsTemplates';
-import MilestonesPage from './components/pages/MilestonesPage';
 import { GoalsProvider } from './context/GoalsContext';
-import Penalties from './components/pages/Penalties';
+import MissedLogs from './components/pages/MissedLogs';
 import Settings from './components/pages/Settings';
 
 export default function App() {
@@ -33,8 +32,7 @@ export default function App() {
                     <Route path="weekly-review" element={<WeeklyReview />} />
                     <Route path="skills" element={<Skills />} />
                     <Route path="goals" element={<GoalsTemplates />} />
-                    <Route path="milestones" element={<MilestonesPage />} />
-                    <Route path="penalties" element={<Penalties />} />
+                    <Route path="missed-logs" element={<MissedLogs />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>
                 </Routes>

@@ -1,14 +1,22 @@
-import { Plus, Target, ArrowRight } from 'lucide-react';
+import { Plus, Target, ArrowRight, Trash2, Edit3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGoals } from '../../context/GoalsContext';
+import { useState } from 'react';
 
 export default function GoalsWidget() {
-  const { goals } = useGoals();
+  const { goals, deleteGoal, updateGoal } = useGoals();
+  const [editingId, setEditingId] = useState(null);
+  const [tempVal, setTempVal] = useState('');
   
   // Show top 3 active goals
   const activeGoals = goals
     .filter(g => g.status === 'Active' && !g.isTemplate)
     .slice(0, 3);
+
+  const handleUpdate = (id, val) => {
+    updateGoal(id, { current: Number(val) });
+    setEditingId(null);
+  };
 
   return (
     <div className="bg-card rounded-2xl shadow-card p-6 border border-border flex flex-col h-full">
@@ -30,15 +38,45 @@ export default function GoalsWidget() {
         ) : (
           activeGoals.map((goal) => {
             const progress = Math.min(100, (Number(goal.current) / Number(goal.target)) * 100);
+            const isEditing = editingId === goal.id;
+
             return (
-              <div key={goal.id} className="space-y-3">
+              <div key={goal.id} className="space-y-3 group">
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <p className="text-[#111827] text-sm font-bold">{goal.name}</p>
                     <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">{goal.category}</span>
                   </div>
-                  <div className="text-[#111827] text-xs font-bold">
-                    {goal.current} / {goal.target} {goal.unit}
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => deleteGoal(goal.id)}
+                      className="p-1 text-text-secondary hover:text-danger opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="text-[#111827] text-xs font-bold">
+                      {isEditing ? (
+                        <div className="flex items-center gap-1">
+                          <input 
+                            type="number"
+                            value={tempVal}
+                            onChange={(e) => setTempVal(e.target.value)}
+                            onBlur={() => handleUpdate(goal.id, tempVal)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleUpdate(goal.id, tempVal)}
+                            autoFocus
+                            className="w-12 px-1 border border-border rounded text-[10px]"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 cursor-pointer" onClick={() => {
+                          setEditingId(goal.id);
+                          setTempVal(goal.current);
+                        }}>
+                          {goal.current} / {goal.target}
+                          <Edit3 className="w-3 h-3 text-text-secondary" />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 

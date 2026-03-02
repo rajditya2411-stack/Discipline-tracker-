@@ -22,11 +22,15 @@ export default function Analytics() {
     let timeLogged = 0;
     const habitCounts = {};
 
+    const rangeStartStr = startDate.toISOString().slice(0, 10);
+    const todayStr = now.toISOString().slice(0, 10);
+
     // Calculate habit stats
     for (let i = 0; i < days; i++) {
       const d = new Date(startDate);
-      d.setDate(d.getDate() + i);
+      d.setDate(startDate.getDate() + i);
       const dateStr = d.toISOString().slice(0, 10);
+      if (dateStr > todayStr) continue; // Don't count future days
       
       totalPossible += habits.length;
       const dayCompletions = completions[dateStr] || {};
@@ -38,9 +42,9 @@ export default function Analytics() {
       });
     }
 
-    // Calculate time stats
+    // Calculate time logged in range
     blocks.forEach(b => {
-      if (b.date >= startDate.toISOString().slice(0, 10)) {
+      if (b.date >= rangeStartStr && b.date <= todayStr) {
         timeLogged += (b.end - b.start);
       }
     });
@@ -78,16 +82,25 @@ export default function Analytics() {
 
   const distributionData = useMemo(() => {
     const categories = {};
+    const now = new Date();
+    const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
+    const startDate = new Date();
+    startDate.setDate(now.getDate() - days);
+    const rangeStartStr = startDate.toISOString().slice(0, 10);
+    const todayStr = now.toISOString().slice(0, 10);
+
     blocks.forEach(b => {
-      categories[b.category] = (categories[b.category] || 0) + (b.end - b.start);
+      if (b.date >= rangeStartStr && b.date <= todayStr) {
+        categories[b.category] = (categories[b.category] || 0) + (b.end - b.start);
+      }
     });
     const total = Object.values(categories).reduce((a, b) => a + b, 0);
     return Object.entries(categories).map(([name, hours]) => ({
       name,
       hours: Math.round(hours * 10) / 10,
       value: total ? Math.round((hours / total) * 100) : 0
-    }));
-  }, [blocks]);
+    })).sort((a, b) => b.hours - a.hours);
+  }, [blocks, range]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
@@ -120,7 +133,7 @@ export default function Analytics() {
 
       <div className="bg-card rounded-3xl p-8 border border-border shadow-sm">
         <h3 className="text-xl font-bold text-text-primary mb-8">Completion Rate - Last 30 Days</h3>
-        <div className="h-[300px] w-100%">
+        <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -188,9 +201,9 @@ export default function Analytics() {
                     dataKey="value"
                   >
                     {distributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 0 ? '#F59E0B' : '#111827'} stroke="#111827" />
+                      <Cell key={`cell-${index}`} fill={index === 0 ? '#111827' : '#374151'} />
                     ))}
-                    {!distributionData.length && <Cell fill="#E5E7EB" stroke="#111827" />}
+                    {!distributionData.length && <Cell fill="#E5E7EB" />}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
@@ -202,7 +215,7 @@ export default function Analytics() {
               {distributionData.map((item, idx) => (
                 <div key={item.name} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: idx === 0 ? '#F59E0B' : '#111827' }} />
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: idx === 0 ? '#111827' : '#374151' }} />
                     <span className="text-text-primary font-medium">{item.name}</span>
                   </div>
                   <span className="text-text-secondary font-bold">{item.hours}h ({item.value}%)</span>
