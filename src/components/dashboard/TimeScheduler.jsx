@@ -50,7 +50,7 @@ export default function TimeScheduler() {
   return (
     <>
       <div className="bg-card rounded-2xl shadow-card p-6 border border-border">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-primary" />
             <h2 className="text-text-primary text-lg font-bold">Today&apos;s Schedule</h2>
@@ -61,7 +61,7 @@ export default function TimeScheduler() {
               setEditingBlock(null);
               setModalOpen(true);
             }}
-            className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-all duration-200"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-all duration-200"
           >
             <Plus className="w-4 h-4" />
             Add Block

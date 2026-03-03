@@ -30,9 +30,9 @@ export default function HabitChecklist() {
   return (
     <>
       <div className="bg-card rounded-2xl shadow-card p-6 transition-all duration-200">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <h2 className="text-text-primary text-lg font-semibold">Today&apos;s Habits</h2>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -49,7 +49,7 @@ export default function HabitChecklist() {
                 setEditingHabit(null);
                 setModalOpen(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 border border-primary text-primary text-sm font-medium rounded-lg hover:bg-primary/5 transition-all duration-200"
+              className="flex items-center justify-center gap-2 px-4 py-2 border border-primary text-primary text-sm font-medium rounded-lg hover:bg-primary/5 transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
               Add Habit

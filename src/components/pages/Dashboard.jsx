@@ -48,9 +48,9 @@ export default function Dashboard() {
     : '0/0 today';
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8 px-4 sm:px-6 lg:px-8 pb-12">
       {/* Row 1 - Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <StatCard label="Total Habits" value={String(totalHabits)} />
         <StatCard
           label="Completed Today"
@@ -73,7 +73,7 @@ export default function Dashboard() {
       </div>
 
       {/* Row 2 - Scheduler + Habits */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 items-start">
         <TimeScheduler />
         <HabitChecklist />
       </div>
@@ -85,10 +85,12 @@ export default function Dashboard() {
       </div>
 
       {/* Row 4 - Heatmap */}
-      <YearHeatmap />
+      <div className="w-full overflow-hidden">
+        <YearHeatmap />
+      </div>
 
       {/* Row 5 - Bottom widgets */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <ActiveSkills />
         <MoneyAtStake />
         <GoalsWidget />

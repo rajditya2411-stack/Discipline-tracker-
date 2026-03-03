@@ -49,7 +49,7 @@ export default function Sidebar({ isOpen, onClose, desktopOpen = true }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = location.pathname === item.path;
@@ -58,14 +58,14 @@ export default function Sidebar({ isOpen, onClose, desktopOpen = true }) {
                 key={item.path}
                 to={item.path}
                 onClick={() => onClose?.()}
-                className={`flex items-center gap-3 px-5 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                   active
-                    ? 'bg-sidebar-hover text-white border-l-4 border-primary -ml-1 pl-6'
-                    : 'text-white/90 hover:bg-sidebar-hover'
+                    ? 'bg-sidebar-hover text-white border-l-4 border-primary -ml-1 pl-5'
+                    : 'text-white/80 hover:bg-sidebar-hover hover:text-white'
                 }`}
               >
-                <Icon className="w-5 h-5 shrink-0" />
-                <span>{item.label}</span>
+                <Icon className="w-4.5 h-4.5 shrink-0" />
+                <span className="truncate">{item.label}</span>
               </Link>
             );
           })}
