@@ -156,6 +156,13 @@ export default function Dashboard() {
         <GoalsWidget />
         <NotesWidget selectedDate={selectedDate} />
       </div>
+
+      {/* Footer */}
+      <footer className="pt-8 pb-4 flex justify-center border-t border-border/50">
+        <p className="text-xs font-bold text-[#111827] uppercase tracking-widest opacity-60">
+          made by rajditya
+        </p>
+      </footer>
     </div>
   );
 }
