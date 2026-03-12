@@ -27,9 +27,9 @@ export default function WeeklyProgressChart() {
   }, [habits, completions]);
 
   return (
-    <div className="bg-card rounded-2xl shadow-card p-6 border border-border">
-      <h3 className="text-text-primary text-lg font-bold mb-6">Weekly Progress</h3>
-      <div className="h-[240px] w-full">
+    <div className="bg-card rounded-2xl shadow-card p-4 sm:p-6 border border-border">
+      <h3 className="text-text-primary text-lg font-bold mb-4 sm:mb-6">Weekly Progress</h3>
+      <div className="h-[220px] sm:h-[240px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
@@ -49,11 +49,7 @@ export default function WeeklyProgressChart() {
               cursor={{fill: '#F9FAFB'}}
               contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}}
             />
-            <Bar dataKey="completed" radius={[4, 4, 0, 0]} barSize={32}>
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.pct > 70 ? '#10B981' : '#111827'} />
-              ))}
-            </Bar>
+            <Bar dataKey="completed" radius={[4, 4, 0, 0]} barSize={32} fill="#111827" />
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -17,35 +17,38 @@ function GoalDetailsModal({ goal, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-2xl rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="p-8 space-y-8 overflow-y-auto">
-           <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-2xl font-bold text-[#111827]">{goal.name}</h2>
-                <p className="text-sm text-text-secondary font-medium uppercase tracking-wider">{goal.category}</p>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm">
+      <div className="bg-white w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-7 overflow-y-auto">
+           {/* Header */}
+           <div className="flex justify-between items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#111827] truncate">{goal.name}</h2>
+                <p className="text-xs sm:text-sm text-text-secondary font-medium uppercase tracking-wider mt-0.5">{goal.category}</p>
               </div>
-              <span className="px-4 py-1 bg-black text-white rounded-full text-[10px] font-bold uppercase tracking-wider">
+              <span className="flex-shrink-0 px-3 py-1 bg-black text-white rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">
                 {goal.status || 'Active'}
               </span>
            </div>
 
-           <div className="grid grid-cols-3 gap-4">
-              <div className="bg-gray-50 rounded-2xl p-6 text-center">
-                 <span className="block text-2xl font-bold text-[#111827]">{goal.current}</span>
-                 <span className="text-[10px] font-bold text-text-secondary uppercase">Current</span>
+           {/* Stats Grid */}
+           <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center">
+                 <span className="block text-xl sm:text-2xl font-bold text-[#111827] truncate">{goal.current}</span>
+                 <span className="text-[9px] sm:text-[10px] font-bold text-text-secondary uppercase mt-1 block">Current</span>
               </div>
-              <div className="bg-gray-50 rounded-2xl p-6 text-center">
-                 <span className="block text-2xl font-bold text-[#111827]">{goal.target}</span>
-                 <span className="text-[10px] font-bold text-text-secondary uppercase">Target</span>
+              <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center">
+                 <span className="block text-xl sm:text-2xl font-bold text-[#111827] truncate">{goal.target}</span>
+                 <span className="text-[9px] sm:text-[10px] font-bold text-text-secondary uppercase mt-1 block">Target</span>
               </div>
-              <div className="bg-gray-50 rounded-2xl p-6 text-center">
-                 <span className="block text-2xl font-bold text-[#111827]">{goal.unit}</span>
-                 <span className="text-[10px] font-bold text-text-secondary uppercase">Unit</span>
+              <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center">
+                 <span className="block text-xl sm:text-2xl font-bold text-[#111827] truncate">{goal.unit}</span>
+                 <span className="text-[9px] sm:text-[10px] font-bold text-text-secondary uppercase mt-1 block">Unit</span>
               </div>
            </div>
 
-           <div className="space-y-4">
+           {/* Progress Bar */}
+           <div className="space-y-3">
               <div className="flex justify-between items-end">
                  <h4 className="text-sm font-bold text-[#111827]">Progress to Goal</h4>
                  <span className="text-xs font-bold text-text-secondary">{Math.round(progress)}%</span>
@@ -55,7 +58,8 @@ function GoalDetailsModal({ goal, onClose }) {
               </div>
            </div>
 
-           <div className="space-y-3">
+           {/* Update Progress */}
+           <div className="space-y-2 sm:space-y-3">
               <h4 className="text-sm font-bold text-[#111827]">Update Progress</h4>
               <form onSubmit={handleLogProgress} className="flex gap-2">
                  <input 
@@ -63,24 +67,25 @@ function GoalDetailsModal({ goal, onClose }) {
                    placeholder={`Add to ${goal.unit}...`} 
                    value={logVal} 
                    onChange={e => setLogVal(e.target.value)}
-                   className="flex-1 px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 text-sm font-medium" 
+                   className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 text-sm font-medium" 
                  />
-                 <button type="submit" className="px-6 bg-black text-white rounded-xl font-bold hover:opacity-90">
+                 <button type="submit" className="flex-shrink-0 px-4 sm:px-6 bg-black text-white rounded-xl font-bold hover:opacity-90 text-sm">
                     Add
                  </button>
               </form>
            </div>
 
+           {/* Description */}
            {goal.description && (
              <div className="space-y-2">
                 <h4 className="text-sm font-bold text-[#111827]">Description</h4>
-                <p className="text-sm text-text-secondary leading-relaxed bg-gray-50 p-4 rounded-xl">{goal.description}</p>
+                <p className="text-sm text-text-secondary leading-relaxed bg-gray-50 p-3 sm:p-4 rounded-xl break-words">{goal.description}</p>
              </div>
            )}
         </div>
-        <div className="p-4 bg-gray-50 border-t border-border flex justify-end gap-3">
-           <button onClick={onClose} className="px-6 py-2 border border-border bg-white text-text-secondary rounded-xl font-bold">Close Card</button>
-           <button onClick={onClose} className="px-6 py-2 bg-black text-white rounded-xl font-bold">Save Changes</button>
+        <div className="p-3 sm:p-4 bg-gray-50 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+           <button onClick={onClose} className="w-full sm:w-auto px-5 py-2.5 border border-border bg-white text-text-secondary rounded-xl font-bold text-sm">Close</button>
+           <button onClick={onClose} className="w-full sm:w-auto px-5 py-2.5 bg-black text-white rounded-xl font-bold text-sm">Save Changes</button>
         </div>
       </div>
     </div>
@@ -284,7 +289,7 @@ export default function GoalsTemplates() {
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X className="w-5 h-5" /></button>
             </div>
             
-            <form onSubmit={handleAddGoal} className="p-8 space-y-6 overflow-y-auto">
+            <form onSubmit={handleAddGoal} className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 overflow-y-auto">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-text-primary uppercase tracking-wider">Goal Name *</label>
                 <input 
@@ -297,7 +302,7 @@ export default function GoalsTemplates() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-primary uppercase tracking-wider">Category</label>
                   <select 
@@ -324,7 +329,7 @@ export default function GoalsTemplates() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-primary uppercase tracking-wider">Target</label>
                   <input 
@@ -348,7 +353,7 @@ export default function GoalsTemplates() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-primary uppercase tracking-wider">Current Progress</label>
                   <input 
@@ -371,29 +376,24 @@ export default function GoalsTemplates() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-primary uppercase tracking-wider">Start Date</label>
-                  <div className="relative">
-                    <input 
-                      type="date" 
-                      value={newGoal.startDate} 
-                      onChange={e => setNewGoal({...newGoal, startDate: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-white border border-border rounded-lg outline-none"
-                    />
-                  </div>
+                  <input 
+                    type="date" 
+                    value={newGoal.startDate} 
+                    onChange={e => setNewGoal({...newGoal, startDate: e.target.value})}
+                    className="w-full px-4 py-2.5 bg-white border border-border rounded-lg outline-none"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-primary uppercase tracking-wider">End Date</label>
-                  <div className="relative">
-                    <input 
-                      type="date" 
-                      value={newGoal.endDate} 
-                      onChange={e => setNewGoal({...newGoal, endDate: e.target.value})}
-                      placeholder="dd-mm-yyyy"
-                      className="w-full px-4 py-2.5 bg-white border border-border rounded-lg outline-none"
-                    />
-                  </div>
+                  <input 
+                    type="date" 
+                    value={newGoal.endDate} 
+                    onChange={e => setNewGoal({...newGoal, endDate: e.target.value})}
+                    className="w-full px-4 py-2.5 bg-white border border-border rounded-lg outline-none"
+                  />
                 </div>
               </div>
 

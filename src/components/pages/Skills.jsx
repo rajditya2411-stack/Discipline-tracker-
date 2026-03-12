@@ -192,18 +192,28 @@ function SkillDetailsModal({ skill, onClose }) {
   const progress = Math.min(100, (skill.invested / skill.target) * 100);
   
   const chartData = useMemo(() => {
-    return [
-      { date: 'Jan 3', val: 0 },
-      { date: 'Jan 10', val: 40 },
-      { date: 'Jan 17', val: 80 },
-      { date: 'Jan 24', val: 120 },
-      { date: 'Jan 31', val: 160 },
-      { date: 'Feb 7', val: 200 },
-      { date: 'Feb 14', val: 240 },
-      { date: 'Feb 21', val: 280 },
-      { date: 'Feb 28', val: skill.invested },
-    ];
-  }, [skill.invested]);
+    const hoursLog = skill.hoursLog || [];
+    if (hoursLog.length === 0) {
+      return [{ date: 'No data', val: 0 }];
+    }
+    
+    // Group hours by date and calculate cumulative total
+    const dateMap = {};
+    hoursLog.forEach(entry => {
+      dateMap[entry.date] = (dateMap[entry.date] || 0) + entry.hours;
+    });
+    
+    // Sort dates and create cumulative data
+    const sortedDates = Object.keys(dateMap).sort();
+    let cumulativeHours = 0;
+    const data = sortedDates.map(date => {
+      cumulativeHours += dateMap[date];
+      const displayDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return { date: displayDate, val: cumulativeHours, rawDate: date };
+    });
+    
+    return data;
+  }, [skill.hoursLog]);
 
   const handleLogHours = (e) => {
     e.preventDefault();
@@ -222,26 +232,26 @@ function SkillDetailsModal({ skill, onClose }) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-white w-full max-w-3xl rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="p-8 space-y-8 overflow-y-auto">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 overflow-y-auto">
            {/* Top Stats */}
-           <div className="grid grid-cols-4 gap-4">
-              <div className="bg-gray-50 rounded-2xl p-6 text-center">
-                 <span className="block text-3xl font-bold text-[#111827]">{Math.round(skill.invested * 1.5 + skill.streak * 20)}</span>
-                 <span className="text-[10px] font-bold text-text-secondary uppercase">Skill Score</span>
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 text-center">
+                 <span className="block text-2xl sm:text-3xl font-bold text-[#111827]">{Math.round(skill.invested * 1.5 + skill.streak * 20)}</span>
+                 <span className="text-[9px] sm:text-[10px] font-bold text-text-secondary uppercase">Skill Score</span>
               </div>
-              <div className="bg-gray-50 rounded-2xl p-6 text-center">
-                 <span className="block text-3xl font-bold text-[#111827]">{skill.invested}h</span>
-                 <span className="text-[10px] font-bold text-text-secondary uppercase">Hours</span>
+              <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 text-center">
+                 <span className="block text-2xl sm:text-3xl font-bold text-[#111827]">{skill.invested}h</span>
+                 <span className="text-[9px] sm:text-[10px] font-bold text-text-secondary uppercase">Hours</span>
               </div>
-              <div className="bg-gray-50 rounded-2xl p-6 text-center">
-                 <span className="block text-3xl font-bold text-[#111827] flex items-center justify-center gap-1">
-                    {skill.streak} <Zap className="w-6 h-6 text-orange-500 fill-orange-500" />
+              <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 text-center">
+                 <span className="block text-2xl sm:text-3xl font-bold text-[#111827] flex items-center justify-center gap-1">
+                    {skill.streak} <Zap className="w-5 sm:w-6 h-5 sm:h-6 text-orange-500 fill-orange-500" />
                  </span>
-                 <span className="text-[10px] font-bold text-text-secondary uppercase">Streak</span>
+                 <span className="text-[9px] sm:text-[10px] font-bold text-text-secondary uppercase">Streak</span>
               </div>
-              <div className="bg-gray-50 rounded-2xl p-6 text-center">
-                 <span className="block text-3xl font-bold text-[#111827]">{skill.projects || 0}</span>
-                 <span className="text-[10px] font-bold text-text-secondary uppercase">Projects</span>
+              <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 text-center">
+                 <span className="block text-2xl sm:text-3xl font-bold text-[#111827]">{skill.projects || 0}</span>
+                 <span className="text-[9px] sm:text-[10px] font-bold text-text-secondary uppercase">Projects</span>
               </div>
            </div>
 
@@ -259,21 +269,40 @@ function SkillDetailsModal({ skill, onClose }) {
 
            {/* Chart Section */}
            <div className="space-y-4">
-              <h4 className="text-sm font-bold text-[#111827]">Hours Progress (Last 8 Weeks)</h4>
-              <div className="h-[200px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9CA3AF' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9CA3AF' }} />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="val" stroke="black" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              <h4 className="text-sm font-bold text-[#111827]">Hours Progress</h4>
+              {chartData.length > 0 && chartData[0].date !== 'No data' ? (
+                <div className="h-[180px] sm:h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9CA3AF' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9CA3AF' }} />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="val" stroke="black" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-sm text-text-secondary italic py-8 text-center">No hours logged yet. Start logging hours to see your progress.</p>
+              )}
            </div>
 
+           {/* Hours Log Section */}
+           {(skill.hoursLog && skill.hoursLog.length > 0) && (
+             <div className="space-y-4">
+               <h4 className="text-sm font-bold text-[#111827]">Hours Logged</h4>
+               <div className="space-y-2 max-h-[150px] overflow-y-auto">
+                 {[...(skill.hoursLog || [])].reverse().map((entry, idx) => (
+                   <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-[#111827]">{entry.hours} hours</span>
+                     <span className="text-xs text-text-secondary font-bold uppercase">{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                   </div>
+                 ))}
+               </div>
+             </div>
+           )}
+
            {/* Inputs */}
-           <div className="grid grid-cols-2 gap-8">
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
               <div className="space-y-3">
                  <h4 className="text-sm font-bold text-[#111827]">Log Hours</h4>
                  <form onSubmit={handleLogHours} className="flex gap-2">
@@ -306,7 +335,7 @@ function SkillDetailsModal({ skill, onClose }) {
               </div>
            </div>
         </div>
-        <div className="p-4 bg-gray-50 border-t border-border flex justify-end gap-3">
+        <div className="p-3 sm:p-4 bg-gray-50 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
            <button onClick={onClose} className="px-6 py-2 border border-border bg-white text-text-secondary rounded-xl font-bold">Close Card</button>
            <button onClick={onClose} className="px-6 py-2 bg-black text-white rounded-xl font-bold">Save Changes</button>
         </div>

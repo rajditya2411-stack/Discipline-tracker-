@@ -13,44 +13,44 @@ export default function MissedLogs() {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
 
-  // Generate missed logs for the last 30 days (both habits and time blocks)
+  // Generate missed logs for only yesterday (previous day that is completely over)
   const missedLogs = useMemo(() => {
     const logs = [];
     const now = new Date();
+    const today = now.toISOString().split('T')[0];
     
-    for (let i = 0; i < 30; i++) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      if (dateStr > now.toISOString().split('T')[0]) continue; // Don't show future dates
-      
-      const dayCompletions = completions[dateStr] || {};
-      const dayBlocks = blocks.filter(b => b.date === dateStr);
-      
-      // Missed habits
-      const missedHabits = habits.filter(h => !dayCompletions[h.id]).map(h => ({
-        id: h.id,
-        name: h.name,
-        type: 'habit'
-      }));
-      
-      // Incomplete time blocks
-      const incompleteBlocks = dayBlocks.filter(b => !b.done).map(b => ({
-        id: b.id,
-        name: b.title,
-        type: 'block'
-      }));
-      
-      const missed = [...missedHabits, ...incompleteBlocks];
-      
-      if (missed.length > 0) {
-        logs.push({
-          date: dateStr,
-          items: missed,
-          totalMissed: missed.length
-        });
-      }
+    // Only get yesterday (previous day)
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    
+    const dayCompletions = completions[yesterdayStr] || {};
+    const dayBlocks = blocks.filter(b => b.date === yesterdayStr);
+    
+    // Missed habits (not completed yesterday)
+    const missedHabits = habits.filter(h => !dayCompletions[h.id]).map(h => ({
+      id: h.id,
+      name: h.name,
+      type: 'habit'
+    }));
+    
+    // Incomplete time blocks (marked as not done yesterday)
+    const incompleteBlocks = dayBlocks.filter(b => !b.done).map(b => ({
+      id: b.id,
+      name: b.title,
+      type: 'block'
+    }));
+    
+    const missed = [...missedHabits, ...incompleteBlocks];
+    
+    if (missed.length > 0) {
+      logs.push({
+        date: yesterdayStr,
+        items: missed,
+        totalMissed: missed.length
+      });
     }
+    
     return logs;
   }, [habits, completions, blocks]);
 

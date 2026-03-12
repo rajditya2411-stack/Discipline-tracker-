@@ -93,11 +93,11 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <div className="flex bg-background rounded-xl p-1 border border-border">
+        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+          <div className="flex bg-background rounded-xl p-1 border border-border flex-1 sm:flex-initial min-w-0">
             <button 
               onClick={() => changeDate(-1)}
-              className="p-1.5 hover:bg-card rounded-lg transition-colors text-text-secondary hover:text-text-primary"
+              className="p-1.5 hover:bg-card rounded-lg transition-colors text-text-secondary hover:text-text-primary flex-shrink-0"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -105,17 +105,17 @@ export default function Dashboard() {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-sm font-bold text-text-primary px-2 outline-none cursor-pointer"
+              className="bg-transparent text-xs sm:text-sm font-bold text-text-primary px-1 sm:px-2 outline-none cursor-pointer min-w-0 flex-1 sm:flex-initial"
             />
             <button 
               onClick={() => changeDate(1)}
-              className="p-1.5 hover:bg-card rounded-lg transition-colors text-text-secondary hover:text-text-primary"
+              className="p-1.5 hover:bg-card rounded-lg transition-colors text-text-secondary hover:text-text-primary flex-shrink-0"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
           
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <button 
               onClick={(e) => {
                 e.stopPropagation();

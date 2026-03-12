@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { BookOpen, Plus, Trash2, Pin, PinOff, Search, Edit3, X, Save } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Pin, PinOff, Search, Edit3, X, Save, Download } from 'lucide-react';
 import { useNotesLibrary } from '../../context/NotesLibraryContext';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export default function Notes() {
   const { notesLibrary, addNote, updateNote, deleteNote, togglePinned } = useNotesLibrary();
@@ -45,6 +47,53 @@ export default function Notes() {
       day: 'numeric',
       year: 'numeric'
     });
+  };
+
+  const downloadPDF = async (note) => {
+    try {
+      const element = document.createElement('div');
+      element.style.padding = '20px';
+      element.style.backgroundColor = '#FFFFFF';
+      element.style.color = '#000000';
+      element.style.fontFamily = 'Arial, sans-serif';
+      element.innerHTML = `
+        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #111827;">${note.title}</h1>
+        <p style="font-size: 12px; color: #9CA3AF; margin-bottom: 20px;">${formatDate(note.updatedAt)}</p>
+        <div style="white-space: pre-wrap; word-break: break-word; font-size: 14px; color: #374151; line-height: 1.6;">${note.content}</div>
+      `;
+      
+      const canvas = await html2canvas(element, {
+        backgroundColor: '#FFFFFF',
+        scale: 2
+      });
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      while (heightLeft > 0) {
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 297;
+        position -= 297;
+        if (heightLeft > 0) {
+          pdf.addPage();
+        }
+      }
+      
+      pdf.save(`${note.title}.pdf`);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Failed to download PDF');
+    }
   };
 
   return (
@@ -221,17 +270,24 @@ export default function Notes() {
                 </div>
               </div>
             ) : selectedNote ? (
-              <div className="p-6">
+              <div className="p-6 space-y-6">
                 {(() => {
                   const note = notesLibrary.find(n => n.id === selectedNote);
                   return (
                     <>
-                      <div className="flex items-start justify-between gap-4 mb-6">
+                      <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <h2 className="text-2xl font-bold text-text-primary mb-1">{note.title}</h2>
-                          <p className="text-xs text-text-secondary uppercase font-bold">{formatDate(note.updatedAt)}</p>
+                          <h2 className="text-3xl font-bold text-text-primary mb-2">{note.title}</h2>
+                          <p className="text-xs text-text-secondary uppercase font-bold tracking-wider">{formatDate(note.updatedAt)}</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => downloadPDF(note)}
+                            className="p-2 rounded-lg bg-background hover:bg-primary/10 text-text-secondary hover:text-primary transition-colors"
+                            title="Download as PDF"
+                          >
+                            <Download className="w-5 h-5" />
+                          </button>
                           <button
                             onClick={() => togglePinned(note.id)}
                             className={`p-2 rounded-lg transition-colors ${
@@ -264,8 +320,10 @@ export default function Notes() {
                           </button>
                         </div>
                       </div>
-                      <div className="prose prose-invert max-w-none">
-                        <p className="text-text-primary whitespace-pre-wrap break-words leading-relaxed">{note.content}</p>
+                      <div className="border-t border-border pt-6">
+                        <div className="prose prose-invert max-w-none">
+                          <p className="text-text-primary whitespace-pre-wrap break-words leading-relaxed text-base">{note.content}</p>
+                        </div>
                       </div>
                     </>
                   );

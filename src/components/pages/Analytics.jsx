@@ -141,9 +141,9 @@ export default function Analytics() {
         <StatCard title="BEST HABIT" value={stats.bestHabit} sub={`${stats.bestHabitCount} completions`} />
       </div>
 
-      <div className="bg-card rounded-3xl p-8 border border-border shadow-sm">
-        <h3 className="text-xl font-bold text-text-primary mb-8">Completion Rate - Last 30 Days</h3>
-        <div className="h-[300px] w-full">
+      <div className="bg-card rounded-3xl p-4 sm:p-6 lg:p-8 border border-border shadow-sm">
+        <h3 className="text-lg sm:text-xl font-bold text-text-primary mb-4 sm:mb-6 lg:mb-8">Completion Rate - Last 30 Days</h3>
+        <div className="h-[250px] sm:h-[280px] lg:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -177,9 +177,9 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-card rounded-2xl p-6 border border-border shadow-sm min-h-[350px]">
-          <h3 className="text-lg font-bold text-text-primary mb-6">Habit Completions</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border shadow-sm min-h-[350px]">
+          <h3 className="text-base sm:text-lg font-bold text-text-primary mb-4 sm:mb-6">Habit Completions</h3>
           {habits.length === 0 ? (
             <p className="text-text-secondary text-sm">No habit data yet.</p>
           ) : (
@@ -197,10 +197,10 @@ export default function Analytics() {
           )}
         </div>
 
-        <div className="bg-card rounded-2xl p-6 border border-border shadow-sm min-h-[350px]">
-          <h3 className="text-lg font-bold text-text-primary mb-6">Time Distribution</h3>
+        <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border shadow-sm min-h-[350px]">
+          <h3 className="text-base sm:text-lg font-bold text-text-primary mb-4 sm:mb-6">Time Distribution</h3>
           <div className="flex flex-col items-center">
-            <div className="h-[180px] w-full relative">
+            <div className="h-[160px] sm:h-[180px] w-full relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -221,9 +221,9 @@ export default function Analytics() {
                 <span className="text-xl font-bold text-text-primary">{stats.timeLogged}h</span>
               </div>
             </div>
-            <div className="mt-6 w-full space-y-2">
+            <div className="mt-4 sm:mt-6 w-full space-y-2">
               {distributionData.map((item, idx) => (
-                <div key={item.name} className="flex items-center justify-between text-xs">
+                <div key={item.name} className="flex items-center justify-between text-xs sm:text-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: idx === 0 ? '#111827' : '#374151' }} />
                     <span className="text-text-primary font-medium">{item.name}</span>
@@ -241,10 +241,10 @@ export default function Analytics() {
 
 function StatCard({ title, value, sub }) {
   return (
-    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-shadow">
-      <p className="text-[10px] font-bold text-text-secondary tracking-widest uppercase mb-3">{title}</p>
+    <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border shadow-sm hover:shadow-md transition-shadow">
+      <p className="text-[9px] sm:text-[10px] font-bold text-text-secondary tracking-widest uppercase mb-2 sm:mb-3">{title}</p>
       <div className="flex flex-col">
-        <span className="text-3xl font-bold text-text-primary">{value}</span>
+        <span className="text-2xl sm:text-3xl font-bold text-text-primary">{value}</span>
         <span className="text-xs text-text-secondary mt-1">{sub}</span>
       </div>
     </div>

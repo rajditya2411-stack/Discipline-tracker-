@@ -27,7 +27,8 @@ export function SkillsProvider({ children }) {
       invested: skillData.invested || 0,
       streak: skillData.streak || 0,
       projects: skillData.projects || 0,
-      marketReady: skillData.marketReady || false
+      marketReady: skillData.marketReady || false,
+      hoursLog: [] // Track hours logged with dates
     }]);
     return id;
   }, []);
@@ -43,8 +44,19 @@ export function SkillsProvider({ children }) {
   }, []);
 
   const addHours = useCallback((id, hours) => {
+    const today = new Date().toISOString().slice(0, 10);
     setSkills((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, invested: (Number(s.invested) || 0) + Number(hours) } : s))
+      prev.map((s) => {
+        if (s.id === id) {
+          const hoursLog = s.hoursLog || [];
+          return { 
+            ...s, 
+            invested: (Number(s.invested) || 0) + Number(hours),
+            hoursLog: [...hoursLog, { hours: Number(hours), date: today }]
+          };
+        }
+        return s;
+      })
     );
   }, []);
 
