@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BookOpen, Plus, Trash2, Pin, PinOff, Search, Edit3, X, Save, Download } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { BookOpen, Plus, Trash2, Pin, PinOff, Search, Edit3, X, Download, ArrowLeft, FileText } from 'lucide-react';
 import { useNotesLibrary } from '../../context/NotesLibraryContext';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -13,10 +13,13 @@ export default function Notes() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNote, setSelectedNote] = useState(null);
 
-  const filteredNotes = notesLibrary.filter(n =>
-    n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    n.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredNotes = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    const all = notesLibrary.filter(
+      n => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q)
+    );
+    return [...all.filter(n => n.pinnedToDashboard), ...all.filter(n => !n.pinnedToDashboard)];
+  }, [notesLibrary, searchQuery]);
 
   const handleCreate = () => {
     if (!title.trim() || !content.trim()) return;
@@ -41,12 +44,15 @@ export default function Notes() {
     setSelectedNote(null);
   };
 
+  const cancelForm = () => {
+    setIsCreating(false);
+    setEditingId(null);
+    setTitle('');
+    setContent('');
+  };
+
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   const downloadPDF = async (note) => {
@@ -57,93 +63,90 @@ export default function Notes() {
       element.style.color = '#000000';
       element.style.fontFamily = 'Arial, sans-serif';
       element.innerHTML = `
-        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #111827;">${note.title}</h1>
-        <p style="font-size: 12px; color: #9CA3AF; margin-bottom: 20px;">${formatDate(note.updatedAt)}</p>
-        <div style="white-space: pre-wrap; word-break: break-word; font-size: 14px; color: #374151; line-height: 1.6;">${note.content}</div>
+        <h1 style="font-size:24px;font-weight:bold;margin-bottom:10px;color:#111827;">${note.title}</h1>
+        <p style="font-size:12px;color:#9CA3AF;margin-bottom:20px;">${formatDate(note.updatedAt)}</p>
+        <div style="white-space:pre-wrap;word-break:break-word;font-size:14px;color:#374151;line-height:1.6;">${note.content}</div>
       `;
-      
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#FFFFFF',
-        scale: 2
-      });
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
+      const canvas = await html2canvas(element, { backgroundColor: '#FFFFFF', scale: 2 });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const imgData = canvas.toDataURL('image/png');
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
       let heightLeft = imgHeight;
       let position = 0;
-      
       while (heightLeft > 0) {
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= 297;
         position -= 297;
-        if (heightLeft > 0) {
-          pdf.addPage();
-        }
+        if (heightLeft > 0) pdf.addPage();
       }
-      
       pdf.save(`${note.title}.pdf`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      alert('Failed to download PDF');
     }
   };
 
+  const activeNote = notesLibrary.find(n => n.id === selectedNote);
+  const pinnedCount = notesLibrary.filter(n => n.pinnedToDashboard).length;
+
+  const showViewer = selectedNote && activeNote && !isCreating && !editingId;
+  const showEditor = isCreating || !!editingId;
+
   return (
     <div className="max-w-7xl mx-auto pb-12">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary flex items-center gap-2 mb-2">
-          <BookOpen className="w-8 h-8 text-primary" />
-          My Notes
-        </h1>
-        <p className="text-text-secondary">Write, organize, and pin your notes to the dashboard</p>
+
+      {/* Page Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] flex items-center gap-2">
+              <BookOpen className="w-7 h-7 shrink-0" />
+              My Notes
+            </h1>
+            <p className="text-sm text-text-secondary mt-1">
+              {notesLibrary.length} {notesLibrary.length === 1 ? 'note' : 'notes'}
+              {pinnedCount > 0 && <span className="ml-2 text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full uppercase tracking-wider">{pinnedCount} pinned</span>}
+            </p>
+          </div>
+          <button
+            onClick={() => { cancelForm(); setSelectedNote(null); setIsCreating(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#111827] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-sm shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Note</span>
+            <span className="sm:hidden">New</span>
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Notes List */}
-        <div className="lg:col-span-1">
-          <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
+
+        {/* Left: Notes List — hidden on mobile when note is selected or form is open */}
+        <div className={`lg:col-span-1 ${(showViewer || showEditor) ? 'hidden lg:block' : 'block'}`}>
+          <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+
             {/* Search */}
-            <div className="p-4 border-b border-border bg-background/30">
+            <div className="p-3 sm:p-4 border-b border-border">
               <div className="relative">
-                <Search className="absolute left-3 top-3 w-4 h-4 text-text-secondary" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search notes..."
-                  className="w-full bg-card border border-border rounded-lg pl-9 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full bg-gray-50 border border-border rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
                 />
               </div>
             </div>
 
-            {/* Create Button */}
-            {!isCreating && (
-              <div className="p-4 border-b border-border">
-                <button
-                  onClick={() => setIsCreating(true)}
-                  className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  New Note
-                </button>
-              </div>
-            )}
-
-            {/* Notes List */}
-            <div className="divide-y divide-border max-h-[600px] overflow-y-auto custom-scrollbar">
+            {/* Notes list */}
+            <div className="divide-y divide-border overflow-y-auto max-h-[65vh] custom-scrollbar">
               {filteredNotes.length === 0 ? (
-                <div className="p-8 text-center">
-                  <BookOpen className="w-8 h-8 text-border mx-auto mb-2" />
-                  <p className="text-text-secondary text-sm">{searchQuery ? 'No notes match your search.' : 'No notes yet. Create one!'}</p>
+                <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                  <FileText className="w-8 h-8 text-gray-200 mb-2" />
+                  <p className="text-sm text-text-secondary">
+                    {searchQuery ? 'No notes match your search.' : 'No notes yet. Create your first one!'}
+                  </p>
                 </div>
               ) : (
                 filteredNotes.map((note) => (
@@ -151,20 +154,25 @@ export default function Notes() {
                     key={note.id}
                     onClick={() => {
                       setSelectedNote(note.id === selectedNote ? null : note.id);
+                      setIsCreating(false);
                       setEditingId(null);
                     }}
-                    className={`w-full text-left p-4 hover:bg-background/50 transition-colors border-l-4 ${
-                      selectedNote === note.id ? 'border-l-primary bg-background/50' : 'border-l-transparent'
+                    className={`w-full text-left p-3 sm:p-4 transition-colors border-l-[3px] ${
+                      selectedNote === note.id
+                        ? 'border-l-[#111827] bg-gray-50'
+                        : 'border-l-transparent hover:bg-gray-50/70'
                     }`}
                   >
-                    <h4 className="text-sm font-bold text-text-primary truncate">{note.title}</h4>
-                    <p className="text-xs text-text-secondary mt-1">{formatDate(note.createdAt)}</p>
-                    {note.pinnedToDashboard && (
-                      <div className="mt-2 flex items-center gap-1">
-                        <Pin className="w-3 h-3 text-primary fill-current" />
-                        <span className="text-xs text-primary font-bold">Pinned</span>
-                      </div>
-                    )}
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="text-sm font-bold text-[#111827] truncate flex-1">{note.title}</h4>
+                      {note.pinnedToDashboard && (
+                        <Pin className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0 mt-0.5" />
+                      )}
+                    </div>
+                    <p className="text-xs text-text-secondary mt-1 line-clamp-2 leading-relaxed">
+                      {note.content.slice(0, 80)}{note.content.length > 80 ? '…' : ''}
+                    </p>
+                    <p className="text-[10px] text-text-secondary font-medium mt-2">{formatDate(note.createdAt)}</p>
                   </button>
                 ))
               )}
@@ -172,167 +180,155 @@ export default function Notes() {
           </div>
         </div>
 
-        {/* Right: Note Editor/Viewer */}
+        {/* Right: Viewer / Editor / Empty state */}
         <div className="lg:col-span-2">
-          <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
-            {isCreating ? (
-              <div className="p-6 space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-text-primary">Create Note</h2>
-                  <button
-                    onClick={() => {
-                      setIsCreating(false);
-                      setTitle('');
-                      setContent('');
-                    }}
-                    className="text-text-secondary hover:text-text-primary transition-colors"
-                  >
-                    <X className="w-5 h-5" />
+          <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+
+            {/* ── EDITOR (create or edit) ── */}
+            {showEditor && (
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={cancelForm}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors lg:hidden"
+                    >
+                      <ArrowLeft className="w-4 h-4 text-text-secondary" />
+                    </button>
+                    <h2 className="text-base font-bold text-[#111827]">
+                      {isCreating ? 'New Note' : 'Edit Note'}
+                    </h2>
+                  </div>
+                  <button onClick={cancelForm} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors hidden lg:block">
+                    <X className="w-4 h-4 text-text-secondary" />
                   </button>
                 </div>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Note Title"
-                  className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm font-bold text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Write your note here..."
-                  className="w-full h-64 bg-background border border-border rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none custom-scrollbar"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleCreate}
-                    className="flex-1 bg-primary text-white py-2 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors"
-                  >
-                    Save Note
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsCreating(false);
-                      setTitle('');
-                      setContent('');
-                    }}
-                    className="flex-1 bg-background text-text-secondary py-2 rounded-lg font-bold text-sm hover:bg-background/80 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : editingId ? (
-              <div className="p-6 space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-text-primary">Edit Note</h2>
-                  <button
-                    onClick={() => {
-                      setEditingId(null);
-                      setTitle('');
-                      setContent('');
-                    }}
-                    className="text-text-secondary hover:text-text-primary transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Note Title"
-                  className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm font-bold text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Write your note here..."
-                  className="w-full h-64 bg-background border border-border rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none custom-scrollbar"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleUpdate(editingId)}
-                    className="flex-1 bg-primary text-white py-2 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors"
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingId(null);
-                      setTitle('');
-                      setContent('');
-                    }}
-                    className="flex-1 bg-background text-text-secondary py-2 rounded-lg font-bold text-sm hover:bg-background/80 transition-colors"
-                  >
-                    Cancel
-                  </button>
+
+                <div className="p-4 sm:p-6 space-y-4 flex-1">
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Note title..."
+                    className="w-full bg-gray-50 border border-border rounded-xl px-4 py-3 text-base font-bold text-[#111827] focus:outline-none focus:ring-1 focus:ring-black placeholder:font-normal placeholder:text-text-secondary"
+                  />
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Write your note here..."
+                    className="w-full h-56 sm:h-72 bg-gray-50 border border-border rounded-xl px-4 py-3 text-sm text-[#111827] focus:outline-none focus:ring-1 focus:ring-black resize-none custom-scrollbar leading-relaxed"
+                  />
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => editingId ? handleUpdate(editingId) : handleCreate()}
+                      className="flex-1 bg-[#111827] text-white py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-colors"
+                    >
+                      {isCreating ? 'Save Note' : 'Save Changes'}
+                    </button>
+                    <button
+                      onClick={cancelForm}
+                      className="flex-1 bg-gray-50 border border-border text-text-secondary py-2.5 rounded-xl font-bold text-sm hover:bg-gray-100 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
-            ) : selectedNote ? (
-              <div className="p-6 space-y-6">
-                {(() => {
-                  const note = notesLibrary.find(n => n.id === selectedNote);
-                  return (
-                    <>
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h2 className="text-3xl font-bold text-text-primary mb-2">{note.title}</h2>
-                          <p className="text-xs text-text-secondary uppercase font-bold tracking-wider">{formatDate(note.updatedAt)}</p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <button
-                            onClick={() => downloadPDF(note)}
-                            className="p-2 rounded-lg bg-background hover:bg-primary/10 text-text-secondary hover:text-primary transition-colors"
-                            title="Download as PDF"
-                          >
-                            <Download className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => togglePinned(note.id)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              note.pinnedToDashboard
-                                ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                                : 'bg-background hover:bg-background/80 text-text-secondary'
-                            }`}
-                            title={note.pinnedToDashboard ? 'Unpin from dashboard' : 'Pin to dashboard'}
-                          >
-                            {note.pinnedToDashboard ? (
-                              <Pin className="w-5 h-5 fill-current" />
-                            ) : (
-                              <PinOff className="w-5 h-5" />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => startEdit(note)}
-                            className="p-2 rounded-lg bg-background hover:bg-background/80 text-text-secondary transition-colors"
-                          >
-                            <Edit3 className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              deleteNote(note.id);
-                              setSelectedNote(null);
-                            }}
-                            className="p-2 rounded-lg bg-background hover:bg-danger/10 text-text-secondary hover:text-danger transition-colors"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
+            )}
+
+            {/* ── VIEWER ── */}
+            {showViewer && (
+              <div className="flex flex-col">
+                {/* Viewer top bar */}
+                <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-border">
+                  <button
+                    onClick={() => setSelectedNote(null)}
+                    className="flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-[#111827] transition-colors lg:hidden"
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Back
+                  </button>
+                  <div className="hidden lg:block" />
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => downloadPDF(activeNote)}
+                      className="p-2 rounded-lg hover:bg-gray-100 text-text-secondary hover:text-[#111827] transition-colors"
+                      title="Download PDF"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => togglePinned(activeNote.id)}
+                      className={`p-2 rounded-lg transition-colors ${
+                        activeNote.pinnedToDashboard
+                          ? 'bg-amber-50 text-amber-500 hover:bg-amber-100'
+                          : 'hover:bg-gray-100 text-text-secondary hover:text-[#111827]'
+                      }`}
+                      title={activeNote.pinnedToDashboard ? 'Unpin from dashboard' : 'Pin to dashboard'}
+                    >
+                      {activeNote.pinnedToDashboard ? <Pin className="w-4 h-4 fill-current" /> : <PinOff className="w-4 h-4" />}
+                    </button>
+                    <button
+                      onClick={() => startEdit(activeNote)}
+                      className="p-2 rounded-lg hover:bg-gray-100 text-text-secondary hover:text-[#111827] transition-colors"
+                      title="Edit"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => { deleteNote(activeNote.id); setSelectedNote(null); }}
+                      className="p-2 rounded-lg hover:bg-red-50 text-text-secondary hover:text-red-500 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Note content */}
+                <div className="p-4 sm:p-6 lg:p-8 space-y-5">
+                  <div>
+                    {activeNote.pinnedToDashboard && (
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-2">
+                        <Pin className="w-3 h-3 fill-current" /> Pinned to dashboard
                       </div>
-                      <div className="border-t border-border pt-6">
-                        <div className="prose prose-invert max-w-none">
-                          <p className="text-text-primary whitespace-pre-wrap break-words leading-relaxed text-base">{note.content}</p>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()}
+                    )}
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[#111827] leading-snug break-words">
+                      {activeNote.title}
+                    </h2>
+                    <p className="text-xs text-text-secondary font-medium mt-2">
+                      Last updated {formatDate(activeNote.updatedAt)}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-border pt-5">
+                    <p className="text-[#374151] text-sm sm:text-base whitespace-pre-wrap break-words leading-relaxed">
+                      {activeNote.content}
+                    </p>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="p-12 text-center">
-                <BookOpen className="w-12 h-12 text-border mx-auto mb-3" />
-                <p className="text-text-secondary font-medium">Select a note to view or create a new one</p>
+            )}
+
+            {/* ── EMPTY / SELECT STATE ── */}
+            {!showEditor && !showViewer && (
+              <div className="flex flex-col items-center justify-center min-h-[400px] p-8 sm:p-12 text-center">
+                <div className="w-16 h-16 bg-gray-50 rounded-full border border-border flex items-center justify-center mb-4">
+                  <BookOpen className="w-8 h-8 text-gray-300" />
+                </div>
+                <h3 className="text-base font-bold text-[#111827]">
+                  {notesLibrary.length === 0 ? 'No notes yet' : 'Select a note'}
+                </h3>
+                <p className="text-sm text-text-secondary mt-1 mb-5">
+                  {notesLibrary.length === 0
+                    ? 'Create your first note to get started.'
+                    : 'Choose a note from the list to read it here.'}
+                </p>
+                <button
+                  onClick={() => setIsCreating(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#111827] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all"
+                >
+                  <Plus className="w-4 h-4" /> New Note
+                </button>
               </div>
             )}
           </div>

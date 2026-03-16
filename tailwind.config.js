@@ -12,7 +12,7 @@ export default {
       colors: {
         background: '#F8F9FB',
         card: '#FFFFFF',
-        sidebar: '#000000',
+        sidebar: '#111111',
         primary: '#000000',
         success: '#6B7280',
         warning: '#9CA3AF',
@@ -20,7 +20,7 @@ export default {
         'text-primary': '#1F2937',
         'text-secondary': '#6B7280',
         border: '#E5E7EB',
-        'sidebar-hover': '#1a1a1a',
+        'sidebar-hover': '#1f1f1f',
         'heat-0': '#EBEDF0',
         'heat-1': '#E5E7EB',
         'heat-2': '#D1D5DB',

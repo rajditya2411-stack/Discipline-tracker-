@@ -237,7 +237,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <footer className="pt-8 pb-4 flex justify-center border-t border-border/50">
-        <p className="text-sm font-bold text-black uppercase tracking-widest">
+        <p className="text-black uppercase tracking-widest font-extrabold text-[15px]">
           made by rajditya
         </p>
       </footer>
